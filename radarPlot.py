@@ -32,7 +32,7 @@ radarSite = 61
 yyyy   = 2008   # year
 mm     = 10     # month
 dd     = 17     # day
-HH     = 19     # hour
+HH     = 20     # hour
 MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 startTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
@@ -182,7 +182,7 @@ print('KNMI download complete.')
 # sequentially untar files
 for i in range(0,len(dlListNam)):
    tar = tarfile.open(localPathRoot+dlListNam[i])
-   tar.extractall()
+   tar.extractall(path=localPathRoot)
    tar.close()
 
    # remove tar file after extracting archive
@@ -400,10 +400,10 @@ for i in range(0,len(dlListNam)):
          subprocess.call('rm '+filename1, shell=True)
 
    # remove all unused hdf5 files
-   subprocess.call('rm *.h5', shell=True)
+   subprocess.call('rm '+localPathRoot+'*.h5', shell=True)
 
 
-#os.system('convert -delay .3/1 -loop 10 -layers optimize '+savepath+'*.png '+savepath+'temp.gif')
+os.system('convert -delay .3/1 -loop 10 -layers optimize '+savepath+'*.png '+savepath+'temp.gif')
 
 
 
