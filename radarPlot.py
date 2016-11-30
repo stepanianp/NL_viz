@@ -26,7 +26,7 @@ import subprocess
 ##################################  STEP 1: Define function inputs  ##################################
 
 # radar site (60 = de bilt; 61 = den helder)
-radarSite = 60
+radarSite = 61
 
 # define start time
 yyyy   = 2008   # year
@@ -373,7 +373,7 @@ for i in range(0,len(dlListNam)):
          W1[np.where(W1<0)]=np.nan
          W1 = ma.masked_where(np.isnan(W1),W1)
          ax4 = pl.subplot2grid((2,2), (1,1))
-         pl.pcolormesh(lon1,lat1,W1,shading='interp', cmap=pl.cm.get_cmap('cubehelix'), vmin=0, vmax=np.max(W1))
+         pl.pcolormesh(lon1,lat1,W1,shading='interp', cmap=pl.cm.get_cmap('cubehelix'), vmin=0, vmax=2)
          pl.colorbar()
          pl.plot(csv[:,1],csv[:,0],color='.5',linewidth=2)
          axes = pl.gca()
@@ -384,9 +384,12 @@ for i in range(0,len(dlListNam)):
          pl.title('Spectrum Width')
 
 #######################################  STEP 6: Save images  ########################################
+         savepath = './'+str(radarSite)+'_'+str(format(startTime.year, '04d'))+str(format(startTime.month, '02d'))+str(format(startTime.day, '02d'))+'T'+str(format(startTime.hour, '02d'))+str(format(startTime.minute, '02d'))+'_'+str(format(endTime.year, '04d'))+str(format(endTime.month, '02d'))+str(format(endTime.day, '02d'))+'T'+str(format(endTime.hour, '02d'))+str(format(endTime.minute, '02d'))+'_'+str(dt)+'min/'
 
+         if not os.path.isdir(savepath):
+            os.makedirs(savepath)
 
-         pl.savefig('rad'+str(radarSite)+'_'+tStr[0:4]+tStr[4:6]+tStr[6:8]+tStr[9:11]+tStr[11:13]+'.png', bbox_inches='tight')
+         pl.savefig(savepath+'rad'+str(radarSite)+'_'+tStr[0:4]+tStr[4:6]+tStr[6:8]+tStr[9:11]+tStr[11:13]+'.png', bbox_inches='tight')
          pl.close()
 
          # remove hdf5 file after saving plot
