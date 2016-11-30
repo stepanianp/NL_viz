@@ -1,3 +1,6 @@
+#added by liz
+import mpl_toolkits
+
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 
