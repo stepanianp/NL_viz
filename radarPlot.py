@@ -1,4 +1,5 @@
 # Code for plotting NL radar data from the KNMI archive
+# Dates can range from 01 January 2008 up to two days ago
 
 ######################################################################################################
 #########################################  DEFINE FUNCTIONS  #########################################
@@ -20,6 +21,7 @@ import wradlib.io as io
 import math
 import matplotlib.pyplot as pl
 import numpy.ma as ma
+import subprocess
 
 ##################################  STEP 1: Define function inputs  ##################################
 
@@ -27,24 +29,27 @@ import numpy.ma as ma
 radarSite = 60
 
 # define start time
-yyyy   = 2010   # year
-mm     = 10    # month
-dd     = 15    # day
-HH     = 13    # hour
-MM     = 5     # minute (will be rounded down to nearest multiple of 5)
+yyyy   = 2008   # year
+mm     = 10     # month
+dd     = 17     # day
+HH     = 18     # hour
+MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 startTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
 # define end time
-yyyy   = 2010   # year
-mm     = 10    # month
-dd     = 15    # day
-HH     = 23    # hour
-MM     = 15     # minute (will be rounded down to nearest multiple of 5)
+yyyy   = 2008   # year
+mm     = 10     # month
+dd     = 17     # day
+HH     = 22     # hour
+MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 endTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
 # interval between images (in minutes)
-dt     = 30     # spacing between images in minutes (will be rounded down to nearest multiple of 5 minutes)
+dt     = 5     # spacing between images in minutes (will be rounded down to nearest multiple of 5 minutes)
 
+# latitude and longitude bounds [min,max] for plotting domain
+latSet = [49,56]
+lonSet = [0,10]
 
 # make sure time increment is multiple of 5 minutes
 dt = int(np.floor(dt/5)*5)
@@ -175,6 +180,9 @@ for i in range(0,len(dlListNam)):
    tar = tarfile.open(localPathRoot+dlListNam[i])
    tar.extractall()
    tar.close()
+
+   # remove tar file after extracting archive
+   subprocess.call('rm '+localPathRoot+dlListNam[i], shell=True)
    
    for tStr in timeList:
       filename1 = localPathRoot+'RAD_NL'+str(radarSite)+'_VOL_NA_'+tStr[0:4]+tStr[4:6]+tStr[6:8]+tStr[9:11]+tStr[11:13]+'.h5'
@@ -202,13 +210,39 @@ for i in range(0,len(dlListNam)):
     
             tm1  = fcontent1['scan'+str(i)]['scan_datetime']
             azm = np.arange(0,360,1)
-    
-            Z1 = 0.5*fcontent1['scan'+str(i)+'/scan_Z_data']-31.5
-            U1 = 0.5*fcontent1['scan'+str(i)+'/scan_uZ_data']-31.5
-            V1 = 0.377953*fcontent1['scan'+str(i)+'/scan_V_data']-48.378
-            W1 = 0.0627559*fcontent1['scan'+str(i)+'/scan_W_data']-0.0627559
-            dims = np.shape(Z1)
 
+            Zform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_Z_formulas'])
+            id1 = Zform.find('=')
+            id2 = Zform.find('*')
+            id3 = Zform.find('+')
+            scaleFactor = float(Zform[id1+1:id2])
+            addOffset   = float(Zform[id3+1:-2])
+            Z1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_Z_data']+addOffset
+
+            Uform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_uZ_formulas'])
+            id1 = Uform.find('=')
+            id2 = Uform.find('*')
+            id3 = Uform.find('+')
+            scaleFactor = float(Uform[id1+1:id2])
+            addOffset   = float(Uform[id3+1:-2])
+            U1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_uZ_data']+addOffset
+
+            Vform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_V_formulas'])
+            id1 = Vform.find('=')
+            id2 = Vform.find('*')
+            id3 = Vform.find('+')
+            scaleFactor = float(Vform[id1+1:id2])
+            addOffset   = float(Vform[id3+1:-2])
+            V1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_V_data']+addOffset
+
+            Wform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_W_formulas'])
+            id1 = Wform.find('=')
+            id2 = Wform.find('*')
+            id3 = Wform.find('+')
+            scaleFactor = float(Wform[id1+1:id2])
+            addOffset   = float(Wform[id3+1:-2])
+            W1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_W_data']+addOffset
+            dims = np.shape(Z1)
     
             rng = np.tile(rng,[dims[0],1])
             azm = np.tile(azm,[dims[1],1])
@@ -222,10 +256,6 @@ for i in range(0,len(dlListNam)):
 
 
 ######################################  STEP 5: Visualise data  ######################################
-
-
-         latSet = np.arange(49,56+.02,.02)
-         lonSet = np.arange(0,10+.02,.02)
 
          cdict1 = {'red':   ((0/20, 255/255, 255/255),
                     (1/20, 204/255, 204/255),
@@ -315,11 +345,11 @@ for i in range(0,len(dlListNam)):
          axes.set_ylim([latSet[0],latSet[-1]])
          pl.xticks([])
          pl.yticks([])
-         pl.title('Reflectivity Factor: De Bilt')
+         pl.title('Reflectivity Factor '+tStr[0:4]+'/'+tStr[4:6]+'/'+tStr[6:8]+' '+tStr[9:11]+':'+tStr[11:13])
 
 
          ax2 = pl.subplot2grid((2,2), (1,0))
-         pl.pcolormesh(lon1,lat1,V1,shading='interp', cmap=vmap, vmin=-25, vmax=25)
+         pl.pcolormesh(lon1,lat1,V1,shading='interp', cmap=vmap, vmin=-np.max(np.absolute(V1)), vmax=np.max(np.absolute(V1)))
          pl.colorbar()
          pl.plot(csv[:,1],csv[:,0],color='.5',linewidth=2)
          axes = pl.gca()
@@ -327,7 +357,7 @@ for i in range(0,len(dlListNam)):
          axes.set_ylim([latSet[0],latSet[-1]])
          pl.xticks([])
          pl.yticks([])
-         pl.title('Radial Velocity: De Bilt')
+         pl.title('Radial Velocity')
 
          ax3 = pl.subplot2grid((2,2), (0,1))
          pl.pcolormesh(lon1,lat1,U1,shading='interp', cmap=NEX, vmin=-35, vmax=40)
@@ -338,12 +368,12 @@ for i in range(0,len(dlListNam)):
          axes.set_ylim([latSet[0],latSet[-1]])
          pl.xticks([])
          pl.yticks([])
-         pl.title('Raw Reflectivity Factor: De Bilt')
+         pl.title('Raw Reflectivity Factor')
    
          W1[np.where(W1<0)]=np.nan
          W1 = ma.masked_where(np.isnan(W1),W1)
          ax4 = pl.subplot2grid((2,2), (1,1))
-         pl.pcolormesh(lon1,lat1,W1,shading='interp', cmap=pl.cm.get_cmap('cubehelix'), vmin=0, vmax=10)
+         pl.pcolormesh(lon1,lat1,W1,shading='interp', cmap=pl.cm.get_cmap('cubehelix'), vmin=0, vmax=np.max(W1))
          pl.colorbar()
          pl.plot(csv[:,1],csv[:,0],color='.5',linewidth=2)
          axes = pl.gca()
@@ -351,15 +381,22 @@ for i in range(0,len(dlListNam)):
          axes.set_ylim([latSet[0],latSet[-1]])
          pl.xticks([])
          pl.yticks([])
-         pl.title('Spectrum Width: De Bilt')
-
-         pl.savefig('rad_'+tStr[0:4]+tStr[4:6]+tStr[6:8]+tStr[8:10]+tStr[10:12]+'.png', bbox_inches='tight')
-         pl.close()
-
+         pl.title('Spectrum Width')
 
 #######################################  STEP 6: Save images  ########################################
 
 
+         pl.savefig('rad'+str(radarSite)+'_'+tStr[0:4]+tStr[4:6]+tStr[6:8]+tStr[9:11]+tStr[11:13]+'.png', bbox_inches='tight')
+         pl.close()
+
+         # remove hdf5 file after saving plot
+         subprocess.call('rm '+filename1, shell=True)
+
+   # remove all unused hdf5 files
+   subprocess.call('rm *.h5', shell=True)
+
+
+###os.system('convert -delay .3/1 -loop 10 -layers optimize *.png temp.gif')
 
 
 
