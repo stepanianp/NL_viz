@@ -29,32 +29,18 @@ import subprocess
 radarSite = 61
 
 # define start time
-<<<<<<< HEAD
-yyyy   = 2010   # year
-mm     = 10    # month
-dd     = 15    # day
-HH     = 12    # hour
-=======
 yyyy   = 2008   # year
 mm     = 10     # month
 dd     = 17     # day
-HH     = 18     # hour
->>>>>>> 11971a1ab9649daa2c0b72aa9b397267020b6107
+HH     = 19     # hour
 MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 startTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
 # define end time
-<<<<<<< HEAD
-yyyy   = 2010   # year
-mm     = 10    # month
-dd     = 16    # day
-HH     = 12    # hour
-=======
 yyyy   = 2008   # year
 mm     = 10     # month
 dd     = 17     # day
 HH     = 22     # hour
->>>>>>> 11971a1ab9649daa2c0b72aa9b397267020b6107
 MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 endTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
@@ -62,8 +48,10 @@ endTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,i
 dt     = 5     # spacing between images in minutes (will be rounded down to nearest multiple of 5 minutes)
 
 # latitude and longitude bounds [min,max] for plotting domain
-latSet = [49,56]
-lonSet = [0,10]
+latSet = [51,54]
+lonSet = [2,8]
+#latSet = [49,56]
+#lonSet = [0,10]
 
 # make sure time increment is multiple of 5 minutes
 dt = int(np.floor(dt/5)*5)
@@ -111,7 +99,7 @@ dlListDir = []
 # open ftp connection
 ftp = ftplib.FTP(knmiPathRoot,'anonymous','anonymous')
 
-# loop over date directories
+# loop over date directories 
 for i in range(0,len(dayList)):
 
    dtStr = dayList[i]
@@ -124,11 +112,11 @@ for i in range(0,len(dayList)):
    try:
        filename = ftp.nlst('RAD*.tar')
 ###       print('File: '+filename[0])
-
+                
        # if file exists, add it to download list
        dlListNam.append(filename[0])
        dlListDir.append('ftp://'+knmiPathRoot+remotePath)
-
+                
    except ftplib.error_temp:
 ###       print('File not found')
        pass
@@ -138,7 +126,9 @@ ftp.quit()
 
 print('Files found:  '+str(len(filename)))
 
-localPathRoot = os.getcwd()+'/'
+localPathRoot = os.getcwd()+'/tempDownload/'
+if not os.path.isdir(localPathRoot):
+   os.makedirs(localPathRoot)
 
 # preallocate space for the cURL objects
 curl = list(range(0,len(dlListNam)))
@@ -195,18 +185,15 @@ for i in range(0,len(dlListNam)):
    tar.extractall()
    tar.close()
 
-<<<<<<< HEAD
-=======
    # remove tar file after extracting archive
    subprocess.call('rm '+localPathRoot+dlListNam[i], shell=True)
    
->>>>>>> 11971a1ab9649daa2c0b72aa9b397267020b6107
    for tStr in timeList:
       filename1 = localPathRoot+'RAD_NL'+str(radarSite)+'_VOL_NA_'+tStr[0:4]+tStr[4:6]+tStr[6:8]+tStr[9:11]+tStr[11:13]+'.h5'
       print(filename1)
 
       if os.path.isfile(filename1):
-
+         
          # read in two files
          fcontent1 = io.read_OPERA_hdf5(filename1)
 
@@ -219,24 +206,14 @@ for i in range(0,len(dlListNam)):
          for i in range(1,0,-1):
             print(i)
             el  = int(fcontent1['scan'+str(i)]['scan_elevation'])
-
+      
             tmp1 = fcontent1['scan'+str(i)]['scan_range_bin']
             tmp2 = int(fcontent1['scan'+str(i)]['scan_number_range'])
             rng = tmp1*np.arange(1,tmp2+1)
 
-
+    
             tm1  = fcontent1['scan'+str(i)]['scan_datetime']
             azm = np.arange(0,360,1)
-<<<<<<< HEAD
-
-            Z1 = 0.5*fcontent1['scan'+str(i)+'/scan_Z_data']-31.5
-            U1 = 0.5*fcontent1['scan'+str(i)+'/scan_uZ_data']-31.5
-            V1 = 0.377953*fcontent1['scan'+str(i)+'/scan_V_data']-48.378
-            W1 = 0.0627559*fcontent1['scan'+str(i)+'/scan_W_data']-0.0627559
-            dims = np.shape(Z1)
-
-
-=======
 
             Zform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_Z_formulas'])
             id1 = Zform.find('=')
@@ -271,7 +248,6 @@ for i in range(0,len(dlListNam)):
             W1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_W_data']+addOffset
             dims = np.shape(Z1)
     
->>>>>>> 11971a1ab9649daa2c0b72aa9b397267020b6107
             rng = np.tile(rng,[dims[0],1])
             azm = np.tile(azm,[dims[1],1])
             azm = math.pi/180*azm.T
@@ -396,13 +372,8 @@ for i in range(0,len(dlListNam)):
          axes.set_ylim([latSet[0],latSet[-1]])
          pl.xticks([])
          pl.yticks([])
-<<<<<<< HEAD
-         pl.title('Raw Reflectivity Factor: De Bilt')
-
-=======
          pl.title('Raw Reflectivity Factor')
    
->>>>>>> 11971a1ab9649daa2c0b72aa9b397267020b6107
          W1[np.where(W1<0)]=np.nan
          W1 = ma.masked_where(np.isnan(W1),W1)
          ax4 = pl.subplot2grid((2,2), (1,1))
@@ -428,18 +399,15 @@ for i in range(0,len(dlListNam)):
          # remove hdf5 file after saving plot
          subprocess.call('rm '+filename1, shell=True)
 
-<<<<<<< HEAD
-#######################################  STEP 6: Save images  ########################################
-=======
    # remove all unused hdf5 files
    subprocess.call('rm *.h5', shell=True)
 
 
-###os.system('convert -delay .3/1 -loop 10 -layers optimize *.png temp.gif')
+#os.system('convert -delay .3/1 -loop 10 -layers optimize '+savepath+'*.png '+savepath+'temp.gif')
 
 
 
 
 
 
->>>>>>> 11971a1ab9649daa2c0b72aa9b397267020b6107
+
