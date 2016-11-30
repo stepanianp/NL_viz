@@ -30,16 +30,16 @@ radarSite = 60
 yyyy   = 2010   # year
 mm     = 10    # month
 dd     = 15    # day
-HH     = 13    # hour
-MM     = 5     # minute (will be rounded down to nearest multiple of 5)
+HH     = 12    # hour
+MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 startTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
 # define end time
 yyyy   = 2010   # year
 mm     = 10    # month
-dd     = 15    # day
-HH     = 23    # hour
-MM     = 15     # minute (will be rounded down to nearest multiple of 5)
+dd     = 16    # day
+HH     = 12    # hour
+MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 endTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
 # interval between images (in minutes)
@@ -92,7 +92,7 @@ dlListDir = []
 # open ftp connection
 ftp = ftplib.FTP(knmiPathRoot,'anonymous','anonymous')
 
-# loop over date directories 
+# loop over date directories
 for i in range(0,len(dayList)):
 
    dtStr = dayList[i]
@@ -105,11 +105,11 @@ for i in range(0,len(dayList)):
    try:
        filename = ftp.nlst('RAD*.tar')
 ###       print('File: '+filename[0])
-                
+
        # if file exists, add it to download list
        dlListNam.append(filename[0])
        dlListDir.append('ftp://'+knmiPathRoot+remotePath)
-                
+
    except ftplib.error_temp:
 ###       print('File not found')
        pass
@@ -175,13 +175,13 @@ for i in range(0,len(dlListNam)):
    tar = tarfile.open(localPathRoot+dlListNam[i])
    tar.extractall()
    tar.close()
-   
+
    for tStr in timeList:
       filename1 = localPathRoot+'RAD_NL'+str(radarSite)+'_VOL_NA_'+tStr[0:4]+tStr[4:6]+tStr[6:8]+tStr[9:11]+tStr[11:13]+'.h5'
       print(filename1)
 
       if os.path.isfile(filename1):
-         
+
          # read in two files
          fcontent1 = io.read_OPERA_hdf5(filename1)
 
@@ -194,22 +194,22 @@ for i in range(0,len(dlListNam)):
          for i in range(1,0,-1):
             print(i)
             el  = int(fcontent1['scan'+str(i)]['scan_elevation'])
-      
+
             tmp1 = fcontent1['scan'+str(i)]['scan_range_bin']
             tmp2 = int(fcontent1['scan'+str(i)]['scan_number_range'])
             rng = tmp1*np.arange(1,tmp2+1)
 
-    
+
             tm1  = fcontent1['scan'+str(i)]['scan_datetime']
             azm = np.arange(0,360,1)
-    
+
             Z1 = 0.5*fcontent1['scan'+str(i)+'/scan_Z_data']-31.5
             U1 = 0.5*fcontent1['scan'+str(i)+'/scan_uZ_data']-31.5
             V1 = 0.377953*fcontent1['scan'+str(i)+'/scan_V_data']-48.378
             W1 = 0.0627559*fcontent1['scan'+str(i)+'/scan_W_data']-0.0627559
             dims = np.shape(Z1)
 
-    
+
             rng = np.tile(rng,[dims[0],1])
             azm = np.tile(azm,[dims[1],1])
             azm = math.pi/180*azm.T
@@ -339,7 +339,7 @@ for i in range(0,len(dlListNam)):
          pl.xticks([])
          pl.yticks([])
          pl.title('Raw Reflectivity Factor: De Bilt')
-   
+
          W1[np.where(W1<0)]=np.nan
          W1 = ma.masked_where(np.isnan(W1),W1)
          ax4 = pl.subplot2grid((2,2), (1,1))
@@ -358,11 +358,3 @@ for i in range(0,len(dlListNam)):
 
 
 #######################################  STEP 6: Save images  ########################################
-
-
-
-
-
-
-
-
