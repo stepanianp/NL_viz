@@ -48,6 +48,8 @@ endTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,i
 dt     = 5     # spacing between images in minutes (will be rounded down to nearest multiple of 5 minutes)
 
 # latitude and longitude bounds [min,max] for plotting domain
+#latSet = [51,54]
+#lonSet = [2,8]
 latSet = [49,56]
 lonSet = [0,10]
 
@@ -124,7 +126,9 @@ ftp.quit()
 
 print('Files found:  '+str(len(filename)))
 
-localPathRoot = os.getcwd()+'/'
+localPathRoot = os.getcwd()+'/tempDownload/'
+if not os.path.isdir(localPathRoot):
+   os.makedirs(localPathRoot)
 
 # preallocate space for the cURL objects
 curl = list(range(0,len(dlListNam)))
@@ -399,7 +403,7 @@ for i in range(0,len(dlListNam)):
    subprocess.call('rm *.h5', shell=True)
 
 
-###os.system('convert -delay .3/1 -loop 10 -layers optimize *.png temp.gif')
+#os.system('convert -delay .3/1 -loop 10 -layers optimize '+savepath+'*.png '+savepath+'temp.gif')
 
 
 
