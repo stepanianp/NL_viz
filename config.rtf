@@ -1,0 +1,42 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Bold;\f2\fnil\fcharset0 Menlo-Regular;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 #available\
+	#radarPlot.py\
+	#mac os\
+\
+if python3 == YES, do\
+
+\f1\b\fs22 	python3 radarPlot.py\
+
+\f0\b0\fs24 	if error, do\
+		download all missing packages via pip3:\
+
+\f1\b\fs22 			pip3 install  - - user < package >\
+
+\f2\b0\fs24 		! 
+\f0 gdal needs to be installed in a different way:\
+
+\f1\b\fs22 			\cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 brew install gdal --with-python3\
+
+\f0\b0\fs24 else\
+	if brew == YES, do\
+
+\f1\b\fs22 		brew install python\
+		brew upgrade python
+\fs24 \
+
+\f0\b0 	return to if python3==YES\
+else\
+
+\f1\b\fs22 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+\f2\b0  #(http://brew.sh/)\
+
+\f0\fs24 	return to if brew == YES\
+	\
+	}
