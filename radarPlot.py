@@ -26,20 +26,20 @@ import subprocess
 ##################################  STEP 1: Define function inputs  ##################################
 
 # radar site (60 = de bilt; 61 = den helder)
-radarSite = 61
+radarSite = 60
 
 # define start time
 yyyy   = 2008   # year
 mm     = 10     # month
-dd     = 17     # day
-HH     = 20     # hour
+dd     = 3     # day
+HH     = 17     # hour
 MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 startTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
 
 # define end time
 yyyy   = 2008   # year
 mm     = 10     # month
-dd     = 17     # day
+dd     = 3     # day
 HH     = 22     # hour
 MM     = 00     # minute (will be rounded down to nearest multiple of 5)
 endTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,int(np.floor(MM/5)*5),0))
@@ -48,10 +48,8 @@ endTime = datetime.datetime.combine(datetime.date(yyyy,mm,dd),datetime.time(HH,i
 dt     = 5     # spacing between images in minutes (will be rounded down to nearest multiple of 5 minutes)
 
 # latitude and longitude bounds [min,max] for plotting domain
-latSet = [51,54]
-lonSet = [2,8]
-#latSet = [49,56]
-#lonSet = [0,10]
+latSet = [49,56]
+lonSet = [0,10]
 
 # make sure time increment is multiple of 5 minutes
 dt = int(np.floor(dt/5)*5)
@@ -219,32 +217,36 @@ for i in range(0,len(dlListNam)):
             id1 = Zform.find('=')
             id2 = Zform.find('*')
             id3 = Zform.find('+')
+            id4 = Zform.find("'",3)
             scaleFactor = float(Zform[id1+1:id2])
-            addOffset   = float(Zform[id3+1:-2])
+            addOffset   = float(Zform[id3+1:id4])
             Z1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_Z_data']+addOffset
 
             Uform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_uZ_formulas'])
             id1 = Uform.find('=')
             id2 = Uform.find('*')
             id3 = Uform.find('+')
+            id4 = Uform.find("'",3)
             scaleFactor = float(Uform[id1+1:id2])
-            addOffset   = float(Uform[id3+1:-2])
+            addOffset   = float(Uform[id3+1:id4])
             U1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_uZ_data']+addOffset
 
             Vform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_V_formulas'])
             id1 = Vform.find('=')
             id2 = Vform.find('*')
             id3 = Vform.find('+')
+            id4 = Vform.find("'",3)
             scaleFactor = float(Vform[id1+1:id2])
-            addOffset   = float(Vform[id3+1:-2])
+            addOffset   = float(Vform[id3+1:id4])
             V1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_V_data']+addOffset
 
             Wform = str(fcontent1['scan'+str(i)+'/calibration']['calibration_W_formulas'])
             id1 = Wform.find('=')
             id2 = Wform.find('*')
             id3 = Wform.find('+')
+            id4 = Wform.find("'",3)
             scaleFactor = float(Wform[id1+1:id2])
-            addOffset   = float(Wform[id3+1:-2])
+            addOffset   = float(Wform[id3+1:id4])
             W1 = scaleFactor*fcontent1['scan'+str(i)+'/scan_W_data']+addOffset
             dims = np.shape(Z1)
     
